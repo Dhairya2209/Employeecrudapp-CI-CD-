@@ -28,7 +28,11 @@ jobs:
           npm install -g @sap/cds-dk mbt
 
       - name: Build CAP project
-        run: npx cds build --production
+        run: |
+          npx cds build --production
+          echo "--- Checking gen/ folder ---"
+          ls -la gen/ || echo "gen/ folder not found!"
+          ls -la gen/db/ || echo "gen/db/ folder not found!"
 
       - name: Build MTA archive
         run: mbt build
@@ -51,6 +55,26 @@ jobs:
           cf auth "${{ secrets.CF_USERNAME }}" "${{ secrets.CF_PASSWORD }}"
           cf target -o "${{ secrets.CF_ORG }}" -s "${{ secrets.CF_SPACE }}"
 
-      - name: Deploy MTA
+      - name: Check CF services
         run: |
-          cf deploy mta_archives/*.mtar -f
+          echo "--- Available services ---"
+          cf services
+          echo "--- HANA DB service detail ---"
+          cf service employee-crud-app-db || echo "Service not found!"
+
+      - name: Deploy MTA
+        id: deploy_mta
+        run: cf deploy mta_archives/*.mtar -f
+        continue-on-error: true
+
+      - name: Fetch DB Deployer logs on failure
+        if: steps.deploy_mta.outcome == 'failure'
+        run: |
+          echo "--- DB Deployer recent logs ---"
+          cf logs employee-crud-app-db-deployer --recent || echo "Could not fetch logs"
+          echo "--- App env (check bindings) ---"
+          cf env employee-crud-app-db-deployer || echo "Could not fetch env"
+
+      - name: Fail pipeline if deploy failed
+        if: steps.deploy_mta.outcome == 'failure'
+        run: exit 1
