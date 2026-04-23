@@ -33,25 +33,28 @@ jobs:
       - name: Build MTA archive
         run: mbt build
 
-      - name: Install Cloud Foundry CLI
-        run: |
-          wget -q -O cf8.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
-          tar -xzf cf8.tgz
-          sudo mv cf /usr/local/bin/cf
-          cf version
+      # ✅ FIXED CF CLI INSTALL
+      - name: Install CF CLI
+        uses: cloudfoundry/cf-cli-action@v2
 
+      - name: Verify CF CLI
+        run: cf version
+
+      # ✅ Install MultiApps plugin
       - name: Install MultiApps plugin
         run: |
           cf add-plugin-repo CF-Community https://plugins.cloudfoundry.org || true
           cf install-plugin multiapps -f
           cf plugins
 
+      # ✅ Login using secrets
       - name: Login to Cloud Foundry
         run: |
           cf api "${{ secrets.CF_API }}"
           cf auth "${{ secrets.CF_USERNAME }}" "${{ secrets.CF_PASSWORD }}"
           cf target -o "${{ secrets.CF_ORG }}" -s "${{ secrets.CF_SPACE }}"
 
+      # ✅ Deploy
       - name: Deploy MTA to Cloud Foundry
         run: |
-          cf deploy mta_archives/employee-crud-app_1.0.0.mtar -f
+          cf deploy mta_archives/*.mtar -f
