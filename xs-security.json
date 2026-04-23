@@ -1,0 +1,10 @@
+{
+  "xsappname": "employeecrudapp",
+  "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://port5000-workspaces-ws-ykfds.us10.trial.applicationstudio.cloud.sap/login/callback",
+      "https://8b328752trial-dev-employee-crud-app.cfapps.ap21.hana.ondemand.com/login/callback"
+      ]
+  }
+}
