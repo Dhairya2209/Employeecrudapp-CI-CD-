@@ -36,7 +36,7 @@ jobs:
       - name: Install Cloud Foundry CLI
         run: |
           curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
-          sudo mv cf /usr/local/bin/
+          sudo mv cf8 /usr/local/bin/cf 2>/dev/null || sudo mv cf /usr/local/bin/cf
           cf version
 
       - name: Install MultiApps plugin
@@ -45,7 +45,6 @@ jobs:
           cf install-plugin multiapps -f
           cf plugins
 
-     
       - name: Login to Cloud Foundry
         run: |
           cf api "${{ secrets.CF_API }}"
