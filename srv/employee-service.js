@@ -3,7 +3,7 @@ const cds = require('@sap/cds');
 module.exports = cds.service.impl(async function () {
   const { Employees } = this.entities;
   const northwind = await cds.connect.to('northwind');
-
+  //this is create command comment
   this.before('CREATE', Employees, async (req) => {
     const data = req.data;
 
